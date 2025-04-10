@@ -1,103 +1,127 @@
-import Image from "next/image";
+'use client'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { InfoIcon } from 'lucide-react'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [vin, setVin] = useState('')
+  const [isValidVin, setIsValidVin] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [selectedService, setSelectedService] = useState('equipment')
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const validateVin = (value: string) => {
+    // VIN must be 17 characters and contain only letters and numbers
+    const vinRegex = /^[A-HJ-NPR-Z0-9]{17}$/i
+    return vinRegex.test(value)
+  }
+
+  const handleVinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase()
+    setVin(value)
+    
+    if (value.length > 0) {
+      const isValid = validateVin(value)
+      setIsValidVin(isValid)
+      if (!isValid) {
+        setErrorMessage('VIN must contain 17 characters (letters and numbers)')
+      } else {
+        setErrorMessage('')
+      }
+    } else {
+      setIsValidVin(true)
+      setErrorMessage('')
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!vin) {
+      setIsValidVin(false)
+      setErrorMessage('Please enter a VIN number')
+      return
+    }
+    
+    if (!validateVin(vin)) {
+      setIsValidVin(false)
+      setErrorMessage('VIN must contain 17 characters (letters and numbers)')
+      return
+    }
+    
+    // Redirect to payment page with VIN and service type as parameters
+    window.location.href = `/payment?vin=${vin}&service=${selectedService}`
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 sm:p-24">
+      <h1 className="text-3xl font-bold mb-2 text-center">Vehicle VIN Lookup</h1>
+      <p className="text-center text-muted-foreground mb-8 max-w-md">
+        Get complete information about your vehicle's equipment specifications and service history
+      </p>
+      
+      <Card className="p-6 sm:p-8 w-full max-w-md">
+        <form onSubmit={handleSubmit}>
+          <div className="mb-6">
+            <Label htmlFor="vin" className="mb-2 block">
+              Enter vehicle VIN number
+            </Label>
+            <Input
+              id="vin"
+              placeholder="Example: WVWZZZ1KZAM123456"
+              value={vin}
+              onChange={handleVinChange}
+              className={!isValidVin ? 'border-red-500' : ''}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+            {!isValidVin && (
+              <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
+            )}
+          </div>
+          
+          <div className="mb-6">
+            <Label className="mb-2 block">
+              Select service type
+            </Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div 
+                className={`border rounded-md p-4 cursor-pointer ${selectedService === 'equipment' ? 'border-primary bg-primary/10' : 'border-input'}`}
+                onClick={() => setSelectedService('equipment')}
+              >
+                <div className="font-medium">Equipment Specifications</div>
+                <div className="text-sm text-muted-foreground">Full vehicle equipment and options</div>
+                <div className="mt-2 font-semibold">$7.00</div>
+              </div>
+              <div 
+                className={`border rounded-md p-4 cursor-pointer ${selectedService === 'service' ? 'border-primary bg-primary/10' : 'border-input'}`}
+                onClick={() => setSelectedService('service')}
+              >
+                <div className="font-medium">Service History</div>
+                <div className="text-sm text-muted-foreground">Complete service and maintenance records</div>
+                <div className="mt-2 font-semibold">$7.00</div>
+              </div>
+            </div>
+          </div>
+          
+          <Alert className="mb-6">
+            <InfoIcon className="h-4 w-4" />
+            <AlertTitle>What is a VIN?</AlertTitle>
+            <AlertDescription>
+              VIN (Vehicle Identification Number) is a unique 17-character code assigned to every vehicle during manufacturing. It's usually located on the dashboard or door jamb.
+            </AlertDescription>
+          </Alert>
+          
+          <Button type="submit" className="w-full">
+            Check for $7.00
+          </Button>
+        </form>
+      </Card>
+      
+      <div className="mt-8 text-center text-sm text-muted-foreground max-w-md">
+        <p>Our service provides complete information about vehicle equipment specifications and service history by VIN number. We work with manufacturer databases and service centers worldwide.</p>
+      </div>
+    </main>
+  )
 }
